@@ -1,34 +1,41 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
-dotenv.config
+dotenv.config();
 const connectDB = async ()=>{
     try{
         await mongoose.connect(process.env.MONGO_URI);
     } catch (error){
-        console.error("faled to connect to MongoDB", error)
+        console.error("failed to connect to MongoDB", error)
     }
 }
 
-const userSchema = mongoose.Schema(
+const userSchema =new mongoose.Schema(
     {
         username:{
-            firstName: {
-                type: String,
-                required: [true, "Please add a firstName"],
-            },
-            lastName: {
-                type: String,
-                required: [true, "Please add a lastName"]
-            }
-        },
-        email:{
             type: String,
-            required: [true, "Please add and email"],
-
+            required: [true, "Please add a username"],
+            unique: true,
+            trim: true,
+            lowercase: true,
+            minLength: 3,
+            maxLength: 30        
+        },
+        firstName: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: 50
+        },
+        lastName: {
+            type: String,
+            required: true,
+            trim: true,
+            maxLength: 50
         },
         password:{
             type: String,
             required:[true, "Please add a password"],
+            minLength: 6
         }
     },
     {
@@ -36,6 +43,19 @@ const userSchema = mongoose.Schema(
     }
 )
 
-const User = mongoose.model("Users", userSchema)
+const accountSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    balance: {
+        type:Number,
+        required: true
+    }
+})
 
-module.exports = {connectDB, User};
+const User = mongoose.model("Users", userSchema);
+const Account = mongoose.model('Accounts', accountSchema);
+
+module.exports = {connectDB, User, Account};
